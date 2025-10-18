@@ -1,13 +1,11 @@
 package school.sorokin.reservation_system;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -16,7 +14,10 @@ public class ReservationService {
     private final Map<Long, Reservation> reservationMap;
     private final AtomicLong idCounter;
 
-    public ReservationService() {
+    private final ReservationRepository repository;
+
+    public ReservationService(ReservationRepository reservationRepository) {
+        this.repository = reservationRepository;
         reservationMap = new HashMap<>();
         idCounter = new AtomicLong(0);
     }
@@ -24,15 +25,18 @@ public class ReservationService {
     public Reservation getReservationById(
          Long id
     ) {
-         if (!reservationMap.containsKey(id)) {
-             throw new NoSuchElementException("Reservation with id " + id + " does not exist");
-         }
+        ReservationEntity reservationEntity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Reservation with id " + id + " does not exist"));
 
-         return reservationMap.get(id);
+        return toDomainReservation(reservationEntity);
     }
 
     public List<Reservation> getAllReservations() {
-        return reservationMap.values().stream().toList();
+        List<ReservationEntity> list = repository.findAll();
+
+        List<Reservation> result = list.stream()
+                .map(this::toDomainReservation).toList();
+        return result;
     };
 
     public Reservation createReservation(Reservation reservationToCreate) {
@@ -145,4 +149,15 @@ public class ReservationService {
         }
         return false;
     };
+
+    private Reservation toDomainReservation(ReservationEntity reservation) {
+        return new Reservation(
+                reservation.getId(),
+                reservation.getUserId(),
+                reservation.getRoomId(),
+                reservation.getStartDate(),
+                reservation.getEndDate(),
+                reservation.getStatus()
+        );
+    }
 }
