@@ -52,13 +52,13 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedReservation);
     };
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
+    @DeleteMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelReservation(
             @PathVariable("id") Long id
     ) {
         log.info("ReservationController => CRUD => Delete Reservation id={}", id);
         try {
-            reservationService.deleteReservation(id);
+            reservationService.cancelReservation(id);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
