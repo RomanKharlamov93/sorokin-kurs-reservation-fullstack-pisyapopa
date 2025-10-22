@@ -1,18 +1,20 @@
 package school.sorokin.reservation_system;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository repository;
+    private final Logger logger =  LoggerFactory.getLogger(ReservationService.class);
 
     public ReservationService(ReservationRepository reservationRepository) {
         this.repository = reservationRepository;
@@ -84,21 +86,12 @@ public class ReservationService {
         return toDomainReservation(updatedReservation);
     };
 
-    public void cancelReservation(
-            Long id
-    ) {
-        if (repository.existsById(id)) {
-            repository.setStatus(id, ReservationStatus.CANCELLED);
-        } else {
-            throw new EntityNotFoundException("Reservation with id " + id + " does not exist");
-        }
-    }
-
     @Transactional
-    public void cancelReservation1(Long id) {
+    public void cancelReservation(Long id) {
         ReservationEntity reservation = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation with id " + id + " does not exist"));
         reservation.setStatus(ReservationStatus.CANCELLED);
+        logger.info("Reservation with id={} has been cancelled", id);
     }
 
     public Reservation approveReservation(Long id) {

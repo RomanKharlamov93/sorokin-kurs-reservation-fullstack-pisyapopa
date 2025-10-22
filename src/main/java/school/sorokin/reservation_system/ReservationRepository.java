@@ -11,8 +11,6 @@ import java.util.List;
 
 public interface ReservationRepository  extends JpaRepository<ReservationEntity, Long> {
 
-    ReservationEntity setStatus(ReservationStatus status);
-
     @Modifying
     @Query("""
     update ReservationEntity
@@ -21,6 +19,5 @@ public interface ReservationRepository  extends JpaRepository<ReservationEntity,
     void setStatus(
             @Param("id") Long id,
             @Param("status") ReservationStatus status
-
     );
 }
